@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-cursor-project",
+  "title": "Open Cursor Project",
+  "description": "Open local or remote Git projects directly in Cursor",
+  "icon": "icon.png",
+  "author": "lappom",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-project",
+      "title": "Open Project",
+      "description": "Open a local or remote project in Cursor",
+      "mode": "view"
+    },
+    {
+      "name": "clone-repo",
+      "title": "Clone Repository",
+      "description": "Clone a Git repository and open it in Cursor",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "scanDirectories",
+      "type": "textfield",
+      "required": false,
+      "title": "Directories to Scan",
+      "description": "Comma-separated list of directories to scan for projects (e.g., ~/Documents, ~/Desktop)",
+      "default": ""
+    },
+    {
+      "name": "scanDepth",
+      "type": "textfield",
+      "required": false,
+      "title": "Scan Depth",
+      "description": "Maximum depth for recursive scanning (default: 3)",
+      "default": "3"
+    },
+    {
+      "name": "excludedFolders",
+      "type": "textfield",
+      "required": false,
+      "title": "Excluded Folders",
+      "description": "Comma-separated list of folder names to exclude (e.g., node_modules,.git,vendor)",
+      "default": "node_modules,.git,vendor,build,dist,.next,.cache"
+    },
+    {
+      "name": "cloneDirectory",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Clone Directory",
+      "description": "Directory where cloned repositories will be saved",
+      "default": "~/Projects"
+    },
+    {
+      "name": "githubToken",
+      "type": "password",
+      "required": false,
+      "title": "GitHub Token",
+      "description": "Personal access token for GitHub (optional)"
+    },
+    {
+      "name": "gitlabToken",
+      "type": "password",
+      "required": false,
+      "title": "GitLab Token",
+      "description": "Personal access token for GitLab (optional)"
+    },
+    {
+      "name": "bitbucketToken",
+      "type": "password",
+      "required": false,
+      "title": "Bitbucket Token",
+      "description": "Personal access token for Bitbucket (optional)"
+    },
+    {
+      "name": "openInNewWindow",
+      "type": "checkbox",
+      "required": false,
+      "title": "Open in New Window",
+      "description": "Always open projects in a new Cursor window",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "simple-git": "^3.22.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit"
+  }
+}
+
