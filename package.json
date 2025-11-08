@@ -22,6 +22,12 @@
       "title": "Clone Repository",
       "description": "Clone a Git repository and open it in Cursor",
       "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Create a new project and open it in Cursor",
+      "mode": "view"
     }
   ],
   "preferences": [

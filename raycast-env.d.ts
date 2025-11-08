@@ -34,6 +34,8 @@ declare namespace Preferences {
   export type OpenProject = ExtensionPreferences & {}
   /** Preferences accessible in the `clone-repo` command */
   export type CloneRepo = ExtensionPreferences & {}
+  /** Preferences accessible in the `create-project` command */
+  export type CreateProject = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -41,5 +43,7 @@ declare namespace Arguments {
   export type OpenProject = {}
   /** Arguments passed to the `clone-repo` command */
   export type CloneRepo = {}
+  /** Arguments passed to the `create-project` command */
+  export type CreateProject = {}
 }
 
