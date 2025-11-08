@@ -110,3 +110,66 @@ export async function getCursorPath(): Promise<string | null> {
   }
 }
 
+export async function openInCursorSSH(sshHost: { user?: string; host: string; port?: number }): Promise<void> {
+  try {
+    // Build SSH connection string
+    const userPart = sshHost.user ? `${sshHost.user}@` : "";
+    const portPart = sshHost.port ? `:${sshHost.port}` : "";
+    const connectionString = `${userPart}${sshHost.host}${portPart}`;
+    const remoteURI = `ssh-remote+${connectionString}`;
+
+    const osPlatform = platform();
+    let command: string;
+
+    if (osPlatform === "win32") {
+      command = `cursor --remote ${remoteURI}`;
+    } else {
+      command = `cursor --remote ${remoteURI}`;
+    }
+
+    await execAsync(command);
+    
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Connecting to SSH host",
+      message: `Connecting to ${connectionString}...`,
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    
+    // Try alternative methods
+    try {
+      const osPlatform = platform();
+      let altCommand: string;
+
+      const userPart = sshHost.user ? `${sshHost.user}@` : "";
+      const portPart = sshHost.port ? `:${sshHost.port}` : "";
+      const connectionString = `${userPart}${sshHost.host}${portPart}`;
+      const remoteURI = `ssh-remote+${connectionString}`;
+
+      if (osPlatform === "win32") {
+        altCommand = `"C:\\Users\\${process.env.USERNAME}\\AppData\\Local\\Programs\\cursor\\Cursor.exe" --remote ${remoteURI}`;
+      } else if (osPlatform === "darwin") {
+        altCommand = `open -a Cursor --args --remote ${remoteURI}`;
+      } else {
+        altCommand = `cursor --remote ${remoteURI}`;
+      }
+
+      await execAsync(altCommand);
+      
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Connecting to SSH host",
+        message: `Connecting to ${connectionString}...`,
+      });
+    } catch (altError) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to connect to SSH host",
+        message: errorMessage,
+      });
+      throw altError;
+    }
+  }
+}
+

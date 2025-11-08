@@ -24,6 +24,12 @@
       "mode": "view"
     },
     {
+      "name": "connect-ssh",
+      "title": "Connect SSH Host",
+      "description": "Connect to a remote host via SSH and open it in Cursor",
+      "mode": "view"
+    },
+    {
       "name": "create-project",
       "title": "Create Project",
       "description": "Create a new project and open it in Cursor",

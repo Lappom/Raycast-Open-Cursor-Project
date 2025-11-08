@@ -42,3 +42,13 @@ export interface Preferences {
   openInNewWindow: boolean;
 }
 
+export interface SSHHost {
+  id: string;
+  user?: string;
+  host: string;
+  port?: number;
+  alias?: string;
+  lastAccessed?: Date;
+  isFavorite?: boolean;
+}
+

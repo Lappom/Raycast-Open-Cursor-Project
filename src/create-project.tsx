@@ -13,12 +13,18 @@ import { Preferences, Project } from "./types";
 import { createProject } from "./utils/project-creator";
 import { openInCursor, isCursorInstalled } from "./utils/cursor";
 import { addToHistory } from "./utils/storage";
+import { exec } from "child_process";
+import { promisify } from "util";
+import { platform } from "os";
+
+const execAsync = promisify(exec);
 
 export default function CreateProject() {
   const preferences = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [cursorInstalled, setCursorInstalled] = useState(false);
+  const [destination, setDestination] = useState<string>(preferences.cloneDirectory || "~/Projects");
 
   useEffect(() => {
     checkCursor();
@@ -36,7 +42,61 @@ export default function CreateProject() {
     }
   }
 
-  async function handleSubmit(values: { projectName: string; destination: string }) {
+  async function handleSelectFolder() {
+    try {
+      const osPlatform = platform();
+      let selectedPath: string | null = null;
+
+      if (osPlatform === "darwin") {
+        // macOS: Use AppleScript to open folder picker
+        const script = `
+          tell application "Finder"
+            activate
+            set folderPath to choose folder with prompt "Select destination folder for your project"
+            return POSIX path of folderPath
+          end tell
+        `;
+        const { stdout } = await execAsync(`osascript -e '${script}'`);
+        selectedPath = stdout.trim();
+      } else if (osPlatform === "win32") {
+        // Windows: Use PowerShell to open folder picker
+        const script = `Add-Type -AssemblyName System.Windows.Forms; $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog; $folderBrowser.Description = 'Select destination folder for your project'; $folderBrowser.ShowNewFolderButton = $true; if ($folderBrowser.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $folderBrowser.SelectedPath }`;
+        const { stdout } = await execAsync(`powershell -Command "${script}"`);
+        selectedPath = stdout.trim();
+      } else {
+        // Linux: Try to use zenity or kdialog
+        try {
+          const { stdout } = await execAsync(`zenity --file-selection --directory --title="Select destination folder"`);
+          selectedPath = stdout.trim();
+        } catch {
+          try {
+            const { stdout } = await execAsync(`kdialog --getexistingdirectory --title "Select destination folder"`);
+            selectedPath = stdout.trim();
+          } catch {
+            throw new Error("No folder picker available. Please install zenity or kdialog.");
+          }
+        }
+      }
+
+      if (selectedPath) {
+        setDestination(selectedPath);
+        showToast({
+          style: Toast.Style.Success,
+          title: "Folder selected",
+          message: selectedPath,
+        });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to select folder",
+        message: errorMessage,
+      });
+    }
+  }
+
+  async function handleSubmit(values: { projectName: string; destination?: string }) {
     if (!cursorInstalled) {
       showToast({
         style: Toast.Style.Failure,
@@ -57,12 +117,12 @@ export default function CreateProject() {
 
     setIsLoading(true);
     try {
-      const destination = values.destination || preferences.cloneDirectory || "~/Projects";
+      const finalDestination = values.destination || destination || preferences.cloneDirectory || "~/Projects";
       
       // Create the project
       const projectPath = await createProject({
         projectName: values.projectName.trim(),
-        destination,
+        destination: finalDestination,
       });
 
       showToast({
@@ -108,6 +168,12 @@ export default function CreateProject() {
             icon={Icon.Plus}
             onSubmit={handleSubmit}
           />
+          <Action
+            title="Select Folder"
+            icon={Icon.Folder}
+            onAction={handleSelectFolder}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+          />
         </ActionPanel>
       }
     >
@@ -121,7 +187,8 @@ export default function CreateProject() {
         id="destination"
         title="Destination Directory"
         placeholder={defaultDestination}
-        defaultValue={defaultDestination}
+        value={destination}
+        onChange={setDestination}
         info="Directory where the project will be created"
       />
       <Form.Description
@@ -131,4 +198,5 @@ export default function CreateProject() {
     </Form>
   );
 }
+
 
