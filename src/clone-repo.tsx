@@ -168,16 +168,11 @@ export default function CloneRepo() {
             key={repo.url}
             title={repo.name}
             subtitle={repo.url}
-            icon={Icon.GitBranch}
+            icon={Icon.Code}
             accessories={[
               {
                 text: repo.provider,
-                icon:
-                  repo.provider === "github"
-                    ? Icon.GitHub
-                    : repo.provider === "gitlab"
-                    ? Icon.GitLab
-                    : Icon.Globe,
+                icon: Icon.Globe,
               },
             ]}
             actions={

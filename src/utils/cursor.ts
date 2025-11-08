@@ -64,6 +64,7 @@ export async function openInCursor(projectPath: string, newWindow: boolean = tru
     try {
       const osPlatform = platform();
       let altCommand: string;
+      const normalizedPath = path.resolve(projectPath);
 
       if (osPlatform === "win32") {
         // Try with full path to cursor.exe

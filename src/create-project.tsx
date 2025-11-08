@@ -9,19 +9,21 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { platform } from "os";
 import { Preferences, Project } from "./types";
 import { createProject } from "./utils/project-creator";
 import { openInCursor, isCursorInstalled } from "./utils/cursor";
 import { addToHistory } from "./utils/storage";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { platform } from "os";
 
 const execAsync = promisify(exec);
 
 export default function CreateProject() {
   const preferences = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();
+  const osPlatform = platform();
+  const modifierKey = osPlatform === "win32" ? "ctrl" : "cmd";
   const [isLoading, setIsLoading] = useState(false);
   const [cursorInstalled, setCursorInstalled] = useState(false);
   const [destination, setDestination] = useState<string>(preferences.cloneDirectory || "~/Projects");
@@ -172,7 +174,7 @@ export default function CreateProject() {
             title="Select Folder"
             icon={Icon.Folder}
             onAction={handleSelectFolder}
-            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            shortcut={{ modifiers: [modifierKey], key: "f" }}
           />
         </ActionPanel>
       }

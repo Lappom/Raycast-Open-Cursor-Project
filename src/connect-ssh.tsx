@@ -11,6 +11,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { platform } from "os";
 import { Preferences, SSHHost } from "./types";
 import { parseSSHString, formatSSHString, formatCursorRemoteURI } from "./utils/ssh-parser";
 import { openInCursorSSH, isCursorInstalled } from "./utils/cursor";
@@ -30,6 +31,8 @@ import { Clipboard } from "@raycast/api";
 export default function ConnectSSH() {
   const preferences = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
+  const osPlatform = platform();
+  const modifierKey = osPlatform === "win32" ? "ctrl" : "cmd";
   const [hosts, setHosts] = useState<SSHHost[]>([]);
   const [favorites, setFavorites] = useState<SSHHost[]>([]);
   const [history, setHistory] = useState<SSHHost[]>([]);
@@ -345,7 +348,7 @@ export default function ConnectSSH() {
                   title="Copy Connection String"
                   icon={Icon.Clipboard}
                   onAction={() => handleCopyConnectionString(host)}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{ modifiers: [modifierKey], key: "c" }}
                 />
                 <Action
                   title="Copy Remote URI"
@@ -356,7 +359,7 @@ export default function ConnectSSH() {
                   title="Edit Host"
                   icon={Icon.Pencil}
                   onAction={() => push(<EditHostForm host={host} onSave={handleEditHost} />)}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={{ modifiers: [modifierKey], key: "e" }}
                 />
                 {selectedSection === "history" && (
                   <Action
@@ -373,7 +376,7 @@ export default function ConnectSSH() {
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   onAction={loadData}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={{ modifiers: [modifierKey], key: "r" }}
                 />
               </ActionPanel>
             }

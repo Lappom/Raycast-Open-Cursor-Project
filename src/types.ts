@@ -4,6 +4,7 @@ export interface Project {
   path: string;
   type: "local" | "remote";
   lastAccessed?: Date;
+  lastModified?: Date;
   isFavorite?: boolean;
   tags?: string[];
   size?: number;

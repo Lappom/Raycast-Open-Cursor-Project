@@ -9,6 +9,7 @@ import {
   Color,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { platform } from "os";
 import { Project, Preferences } from "./types";
 import { scanProjects } from "./utils/project-scanner";
 import { openInCursor, isCursorInstalled } from "./utils/cursor";
@@ -19,11 +20,14 @@ import {
   getHistory,
   addToHistory,
   removeFromHistory,
+  clearCache,
 } from "./utils/storage";
 import { Clipboard } from "@raycast/api";
 
 export default function OpenProject() {
   const preferences = getPreferenceValues<Preferences>();
+  const osPlatform = platform();
+  const modifierKey = osPlatform === "win32" ? "ctrl" : "cmd";
   const [projects, setProjects] = useState<Project[]>([]);
   const [favorites, setFavorites] = useState<Project[]>([]);
   const [history, setHistory] = useState<Project[]>([]);
@@ -49,9 +53,14 @@ export default function OpenProject() {
     }
   }
 
-  async function loadData() {
+  async function loadData(forceRefresh: boolean = false) {
     setIsLoading(true);
     try {
+      // Clear cache if force refresh is requested
+      if (forceRefresh) {
+        await clearCache();
+      }
+      
       const [scannedProjects, favs, hist] = await Promise.all([
         scanProjects(preferences),
         getFavorites(),
@@ -154,7 +163,24 @@ export default function OpenProject() {
       source = projects;
     }
 
-    return filterProjects(source);
+    const filtered = filterProjects(source);
+    
+    // Sort: favorites first, then by last modified date, then alphabetically
+    return filtered.sort((a, b) => {
+      // Favorites first
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      
+      // Then by last modified date (most recent first)
+      if (a.lastModified && b.lastModified) {
+        return new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime();
+      }
+      if (a.lastModified && !b.lastModified) return -1;
+      if (!a.lastModified && b.lastModified) return 1;
+      
+      // Finally alphabetically by name
+      return a.name.localeCompare(b.name);
+    });
   }
 
   const displayProjects = getDisplayProjects();
@@ -220,7 +246,7 @@ export default function OpenProject() {
                 title="Copy Path"
                 icon={Icon.Clipboard}
                 onAction={() => handleCopyPath(project)}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={{ modifiers: [modifierKey], key: "c" }}
               />
               {selectedSection === "history" && (
                 <Action
@@ -236,8 +262,8 @@ export default function OpenProject() {
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
-                onAction={loadData}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => loadData(true)}
+                shortcut={{ modifiers: [modifierKey], key: "r" }}
               />
             </ActionPanel>
           }
